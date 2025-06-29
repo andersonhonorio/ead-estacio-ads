@@ -205,8 +205,10 @@
       "question":"A developer needs to implement a custom SOAP Web Service that is used by an external Web Application. The developer chooses to include helper methods that are not used by the Web Application in the implementation of the Web Service Class.\n\nWhich code segment shows the correct declaration of the class and methods?",
       "answers":{
          "options":{
-            "a":"@global class WebServiceClass {\n    private static Boolean helperMethod() { /* implementation */ }\n    global string updateRecords() { /* implementation */ }\n}",
-            "b":"@webservice class WebServiceClass {\n    private static boolean helperMethod() { /* implementation */ }\n    webservice static string updateRecords() { /* implementation */ }\n}"
+           "a": "<pre>global class WebServiceClass {\n    private Boolean helperMethod() { /* implementation */ }\n    global String updateRecords() { /* implementation */ }\n}</pre>",
+           "b": "<pre>global class WebServiceClass {\n    private Boolean helperMethod() { /* implementation */ }\n    global static String updateRecords() { /* implementation */ }\n}</pre>",
+           "c": "<pre>global class WebServiceClass {\n    private Boolean helperMethod() { /* implementation */ }\n    webservice static String updateRecords() { /* implementation */ }\n}</pre>",
+           "d": "<pre>webservice class WebServiceClass {\n    private Boolean helperMethod() { /* implementation */ }\n    webservice static String updateRecords() { /* implementation */ }\n}</pre>"
          },
          "correct":{
             "a":false,
