@@ -75,7 +75,7 @@
       }
    },
    {
-      "question": "A developer created a Visualforce page and custom controller to display the account type field as shown below.\n\nCustom controller code:\n\npublic with sharing class customCtrl{\n  private Account theAccount;\n  public String actType;\n\n  public customCtrl(){\n    theAccount = [SELECT Id, Type FROM Account WHERE Id = ApexPages.currentPage().getParameters().get('id')];\n    actType = ...\n  }\n}\n\nWhat is the problem?",
+      "question": "A developer created a Visualforce page and custom controller to display the account type field as shown below.\n\nCustom controller code:\n\n<pre>public with sharing class customCtrl{\n  private Account theAccount;\n  public String actType;\n\n  public customCtrl(){\n    theAccount = [SELECT Id, Type FROM Account WHERE Id = ApexPages.currentPage().getParameters().get('id')];\n    actType = ...\n  }\n}</pre>\n\nWhat is the problem?",
       "answers": {
          "options": {
             "a": "Add a getter method for the actType attribute.",
