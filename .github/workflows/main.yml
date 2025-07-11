@@ -1,0 +1,49 @@
+# .github/workflows/main.yml
+
+name: CI com Testes e Coverage (Comentário Manual)
+
+on:
+  pull_request: # Só precisa rodar no PR para este caso
+    branches: [ main ]
+
+jobs:
+  build-test-comment:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v3
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Instalar dependências
+        run: npm install
+
+      - name: Rodar testes e gerar coverage
+        # O comando é executado e o resultado é enviado para um arquivo
+        run: npm run coverage | tee ./coverage/coverage-summary.txt
+
+      - name: Extrair sumário do coverage para o comentário
+        id: coverage_comment
+        # Usamos `run` com `shell` para processar o texto
+        run: |
+          COMMENT_BODY="### :white_check_mark: Resumo do Coverage
+          \`\`\`
+          $(cat ./coverage/coverage-summary.txt)
+          \`\`\`"
+          # Escapa caracteres especiais e armazena em uma variável de saída
+          COMMENT_BODY="${COMMENT_BODY//'%'/'%25'}"
+          COMMENT_BODY="${COMMENT_BODY//$'\n'/'%0A'}"
+          COMMENT_BODY="${COMMENT_BODY//$'\r'/'%0D'}"
+          echo "body=$COMMENT_BODY" >> $GITHUB_OUTPUT
+
+      - name: Publicar comentário de coverage no PR
+        # Só executa em Pull Requests
+        if: github.event_name == 'pull_request'
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          # Usa o corpo do comentário que preparamos no passo anterior
+          message: ${{ steps.coverage_comment.outputs.body }}

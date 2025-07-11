@@ -1,0 +1,17 @@
+{
+  "name": "github-action-test-example",
+  "version": "1.0.0",
+  "description": "Exemplo de testes unitários para uma GitHub Action com Mocha, Sinon e NYC",
+  "main": "src/action.js",
+  "scripts": {
+    "test": "mocha",
+    "coverage": "nyc --reporter=text-summary --reporter=lcov npm test",
+    "coverage:summary": "nyc report --reporter=text-summary"    
+  },
+  "devDependencies": {
+    "chai": "^4.3.4",
+    "mocha": "^9.1.3",
+    "nyc": "^15.1.0",
+    "sinon": "^12.0.1"
+  }
+}
