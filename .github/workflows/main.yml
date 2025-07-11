@@ -38,22 +38,23 @@ jobs:
       - name: Garantir que a pasta de coverage exista
         run: mkdir -p ./coverage
 
-      - name: Gerar arquivo de sumário para o comentário do PR
-        run: npm run coverage:summary > ./coverage/coverage-summary.txt
+      # 1. Gera o sumário RAW de texto
+      - name: Gerar o conteúdo do sumário
+        run: npm run coverage:summary > ./coverage/raw-summary.txt
 
-      # --- PASSO CORRIGIDO PARA FORMATAÇÃO CORRETA ---
-      - name: Preparar corpo do comentário
-        id: coverage_comment
+      # 2. Cria o arquivo de comentário formatado em Markdown
+      - name: Criar o arquivo de comentário em Markdown
         run: |
-          echo 'body<<EOF' >> $GITHUB_OUTPUT
-          echo '### :white_check_mark: Resumo do Coverage' >> $GITHUB_OUTPUT
-          echo '```' >> $GITHUB_OUTPUT
-          cat ./coverage/coverage-summary.txt >> $GITHUB_OUTPUT
-          echo '```' >> $GITHUB_OUTPUT
-          echo 'EOF' >> $GITHUB_OUTPUT
+          echo "### :white_check_mark: Resumo do Coverage" > ./coverage/coverage-comment.md
+          echo "" >> ./coverage/coverage-comment.md
+          echo '```' >> ./coverage/coverage-comment.md
+          cat ./coverage/raw-summary.txt >> ./coverage/coverage-comment.md
+          echo '```' >> ./coverage/coverage-comment.md
 
+      # 3. Publica o comentário no PR usando o arquivo Markdown
       - name: Publicar comentário de coverage no PR
         if: github.event_name == 'pull_request'
         uses: marocchino/sticky-pull-request-comment@v2
         with:
-          message: ${{ steps.coverage_comment.outputs.body }}
+          # A mudança crucial: usamos 'path' em vez de 'message'
+          path: ./coverage/coverage-comment.md
