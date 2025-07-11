@@ -5,8 +5,8 @@
   "main": "src/action.js",
   "scripts": {
     "test": "mocha",
-    "coverage": "nyc --reporter=text-summary --reporter=lcov npm test",
-    "coverage:summary": "nyc report --reporter=text-summary"    
+    "coverage": "nyc npm test",
+    "coverage:summary": "nyc report --reporter=text"    
   },
   "devDependencies": {
     "chai": "^4.3.4",
