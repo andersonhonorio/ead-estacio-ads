@@ -1,49 +1,69 @@
-# .github/workflows/main.yml
+# Nome do Workflow
+name: CI com Testes e Comentário de Coverage
 
-name: CI com Testes e Coverage (Comentário Manual)
-
+# Gatilhos (Triggers)
 on:
-  pull_request: # Só precisa rodar no PR para este caso
+  push:
+    branches: [ main ]
+  pull_request:
     branches: [ main ]
 
+# Definição dos Jobs
 jobs:
   build-test-comment:
+    # Ambiente de execução
     runs-on: ubuntu-latest
-    steps:
-      - name: Checkout do código
-        uses: actions/checkout@v3
 
+    # Passos do Job
+    steps:
+      # 1. Faz o checkout do código do seu repositório para o ambiente da Action
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      # 2. Configura o ambiente Node.js
       - name: Configurar Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
           cache: 'npm'
 
+      # 3. Instala as dependências do projeto
       - name: Instalar dependências
-        run: npm install
+        run: npm ci
 
-      - name: Rodar testes e gerar coverage
-        # O comando é executado e o resultado é enviado para um arquivo
-        run: npm run coverage | tee ./coverage/coverage-summary.txt
+      # 4. Roda os testes e gera os dados brutos de coverage
+      # Este passo cria a pasta .nyc_output/ com os dados.
+      # Ele também pode ou não criar a pasta 'coverage', dependendo da configuração.
+      - name: Rodar testes e gerar dados de coverage
+        run: npm run coverage
 
+      # 5. Garante que o diretório de destino exista
+      # --- ESTE É O PASSO CRUCIAL DE CORREÇÃO ---
+      # Cria o diretório 'coverage' de forma segura. O '-p' evita erros se a pasta já existir.
+      - name: Garantir que a pasta de coverage exista
+        run: mkdir -p ./coverage
+
+      # 6. Gera o arquivo de sumário detalhado para o comentário do PR
+      # Agora este comando é seguro, pois o diretório de destino foi garantido no passo anterior.
+      - name: Gerar arquivo de sumário para o comentário do PR
+        run: npm run coverage:summary > ./coverage/coverage-summary.txt
+
+      # 7. Prepara o corpo do comentário a ser postado no PR
       - name: Extrair sumário do coverage para o comentário
         id: coverage_comment
-        # Usamos `run` com `shell` para processar o texto
         run: |
           COMMENT_BODY="### :white_check_mark: Resumo do Coverage
           \`\`\`
           $(cat ./coverage/coverage-summary.txt)
           \`\`\`"
-          # Escapa caracteres especiais e armazena em uma variável de saída
           COMMENT_BODY="${COMMENT_BODY//'%'/'%25'}"
           COMMENT_BODY="${COMMENT_BODY//$'\n'/'%0A'}"
           COMMENT_BODY="${COMMENT_BODY//$'\r'/'%0D'}"
           echo "body=$COMMENT_BODY" >> $GITHUB_OUTPUT
 
+      # 8. Publica o comentário no Pull Request
       - name: Publicar comentário de coverage no PR
-        # Só executa em Pull Requests
         if: github.event_name == 'pull_request'
         uses: marocchino/sticky-pull-request-comment@v2
         with:
-          # Usa o corpo do comentário que preparamos no passo anterior
           message: ${{ steps.coverage_comment.outputs.body }}
