@@ -14,54 +14,44 @@ jobs:
     # Ambiente de execução
     runs-on: ubuntu-latest
 
-    # --- ADICIONE ESTE BLOCO DE PERMISSÕES AQUI ---
-    # Concede a permissão necessária para a action poder comentar no PR
+    # Permissão para a action poder comentar no PR
     permissions:
       pull-requests: write
 
     # Passos do Job
     steps:
-      # 1. Faz o checkout do código
       - name: Checkout do código
         uses: actions/checkout@v4
 
-      # 2. Configura o ambiente Node.js
       - name: Configurar Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
 
-      # 3. Instala as dependências do projeto
       - name: Instalar dependências
         run: npm ci
 
-      # 4. Roda os testes e gera os dados brutos de coverage
       - name: Rodar testes e gerar dados de coverage
         run: npm run coverage
 
-      # 5. Garante que o diretório de destino exista
       - name: Garantir que a pasta de coverage exista
         run: mkdir -p ./coverage
 
-      # 6. Gera o arquivo de sumário detalhado para o comentário do PR
       - name: Gerar arquivo de sumário para o comentário do PR
         run: npm run coverage:summary > ./coverage/coverage-summary.txt
 
-      # 7. Prepara o corpo do comentário a ser postado no PR
-      - name: Extrair sumário do coverage para o comentário
+      # --- PASSO CORRIGIDO PARA FORMATAÇÃO CORRETA ---
+      - name: Preparar corpo do comentário
         id: coverage_comment
         run: |
-          COMMENT_BODY="### :white_check_mark: Resumo do Coverage
-          \`\`\`
-          $(cat ./coverage/coverage-summary.txt)
-          \`\`\`"
-          COMMENT_BODY="${COMMENT_BODY//'%'/'%25'}"
-          COMMENT_BODY="${COMMENT_BODY//$'\n'/'%0A'}"
-          COMMENT_BODY="${COMMENT_BODY//$'\r'/'%0D'}"
-          echo "body=$COMMENT_BODY" >> $GITHUB_OUTPUT
+          echo 'body<<EOF' >> $GITHUB_OUTPUT
+          echo '### :white_check_mark: Resumo do Coverage' >> $GITHUB_OUTPUT
+          echo '```' >> $GITHUB_OUTPUT
+          cat ./coverage/coverage-summary.txt >> $GITHUB_OUTPUT
+          echo '```' >> $GITHUB_OUTPUT
+          echo 'EOF' >> $GITHUB_OUTPUT
 
-      # 8. Publica o comentário no Pull Request
       - name: Publicar comentário de coverage no PR
         if: github.event_name == 'pull_request'
         uses: marocchino/sticky-pull-request-comment@v2
