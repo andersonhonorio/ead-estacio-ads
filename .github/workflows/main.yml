@@ -14,9 +14,14 @@ jobs:
     # Ambiente de execução
     runs-on: ubuntu-latest
 
+    # --- ADICIONE ESTE BLOCO DE PERMISSÕES AQUI ---
+    # Concede a permissão necessária para a action poder comentar no PR
+    permissions:
+      pull-requests: write
+
     # Passos do Job
     steps:
-      # 1. Faz o checkout do código do seu repositório para o ambiente da Action
+      # 1. Faz o checkout do código
       - name: Checkout do código
         uses: actions/checkout@v4
 
@@ -32,19 +37,14 @@ jobs:
         run: npm ci
 
       # 4. Roda os testes e gera os dados brutos de coverage
-      # Este passo cria a pasta .nyc_output/ com os dados.
-      # Ele também pode ou não criar a pasta 'coverage', dependendo da configuração.
       - name: Rodar testes e gerar dados de coverage
         run: npm run coverage
 
       # 5. Garante que o diretório de destino exista
-      # --- ESTE É O PASSO CRUCIAL DE CORREÇÃO ---
-      # Cria o diretório 'coverage' de forma segura. O '-p' evita erros se a pasta já existir.
       - name: Garantir que a pasta de coverage exista
         run: mkdir -p ./coverage
 
       # 6. Gera o arquivo de sumário detalhado para o comentário do PR
-      # Agora este comando é seguro, pois o diretório de destino foi garantido no passo anterior.
       - name: Gerar arquivo de sumário para o comentário do PR
         run: npm run coverage:summary > ./coverage/coverage-summary.txt
 
